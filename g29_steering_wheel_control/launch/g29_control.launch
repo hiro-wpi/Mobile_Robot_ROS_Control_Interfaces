@@ -1,0 +1,39 @@
+<launch>
+
+    <!-- Steering Input -->
+    <!-- Set the joystick input -->
+    <arg name="joystick" default="js1"/>
+    <arg name="base_topic" default="cmd_vel"/>
+
+    <!-- Joy node -->
+    <node respawn="true" pkg="joy" type="joy_node" name="logitech_steering_wheel_node" >
+        <param name="dev" value="/dev/input/$(arg joystick)" type="string" />
+        <param name="coalesce_interval" value="0.02" type="double"/>
+        <param name="default_trig_val" value="true"/>
+        <param name="deadzone" value="0.05" type="double"/>
+        <remap from="/joy" to="/G29/joy" />
+    </node>
+
+    <!-- Steering wheel input node -->
+    <node name="g29_control_node" pkg="g29_steering_wheel_control" type="g29_control.py">
+        <remap from="cmd_vel" to="$(arg base_topic)" />
+    </node>
+
+    
+    <!-- Force feedback -->
+    <!-- Load logitech g29 configuration -->
+    <rosparam command="load" file="$(find g29_steering_wheel_control)/config/g29.yaml"/>
+    <!-- Steering wheel setup-->
+    <node name="g29_feedback" pkg="g29_force_feedback" type="g29_force_feedback_node"
+          respawn="false" output="screen">>
+        <remap from="/ff_target" to="/G29/ff_target" />
+    </node>
+    
+    <!-- self centering -->
+    <rosparam> Kp: 1.3 </rosparam>
+    <node name="g29_self_centering_node" pkg="g29_steering_wheel_control" type="g29_self_centering.py"
+        respawn="false" output="screen">
+        <remap from="/target_angle" to="/G29/ff_target" />
+    </node>
+    
+</launch>
