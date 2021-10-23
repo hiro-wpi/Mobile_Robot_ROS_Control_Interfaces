@@ -3,8 +3,6 @@
 import rospy
 from geometry_msgs.msg import Point, Twist
 
-import numpy as np
-
 
 class FalconControl():
 
