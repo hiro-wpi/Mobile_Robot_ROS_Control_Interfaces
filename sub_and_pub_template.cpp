@@ -30,7 +30,7 @@ public:
         float angle_map = 1.047;
         angle.data = twist.angular.z * angle_map;
 
-        // ROS_DEBUG("Get angle %f", angle.data);
+        // ROS_INFO("Get angle %f", angle.data);
         float_pub.publish(angle);
     }
 };
