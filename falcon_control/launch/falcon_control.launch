@@ -1,0 +1,16 @@
+<launch>
+    
+    <!-- Parameters -->
+    <arg name="base_topic" default="cmd_vel"/>
+
+    <!-- Start the ros falcon interface -->
+    <node name="falcon_interface" pkg="ros_falcon_interface" 
+          type="ros_falcon_interface" output="screen"> 
+    </node>
+
+    <!-- Controller - map falcon input into robot input -->
+    <node name="falcon_control_node" pkg="falcon_control" type="falcon_control.py" output="screen">
+        <remap from="cmd_vel" to="$(arg base_topic)" />
+    </node>
+
+</launch>
