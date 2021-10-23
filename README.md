@@ -22,9 +22,9 @@ This package includes keyboard and mouse controller for teleoperating mobile rob
 
 - `roslaunch keyboard_control TODO  ` 
 
-- `roslaunch joystick_control TODO`
-- `roslaunch falcon_control`
-- `roslaunch g29_steering_wheel_control`
+- `roslaunch joystick_control joystick_control.launch base_topic:=cmd_vel camera_topic:=pitch_yaw` 
+- `roslaunch falcon_control falcon_control.launch base_topic:=cmd_vel`  
+- `roslaunch g29_steering_wheel_control g29_control.launch base_topic:=cmd_vel`
 
 For more details, please refer to the README files in each folder.
 

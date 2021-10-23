@@ -11,5 +11,5 @@ TODO
 
 You can specify the published topic names in the command or you could change the default topic name in launch files.
 
-- `roslaunch joystick_control TODO  ` 
+- `roslaunch joystick_control base_topic:=cmd_vel camera_topic:=pitch_yaw  ` 
 
