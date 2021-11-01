@@ -2,5 +2,5 @@
 	path = ros_falcon_interface
 	url = git@github.com:ZhuoyunZhong/ros_falcon_interface.git
 [submodule "ros-g29-force-feedback"]
-	path = g29_force_feedback
-	url = git@github.com:kuriatsu/ros-g29-force-feedback.git
+	path = ros-g29-force-feedback
+	url = https://github.com/kuriatsu/ros-g29-force-feedback.git
