@@ -29,7 +29,7 @@ To control a robot base and its active camera using game controller
 #include "geometry_msgs/Twist.h"
 #include "ros/ros.h"
 #include "sensor_msgs/Joy.h"
-#include "teleop_twist_joy/teleop_twist_joy.h"
+#include "joystick_control/teleop_twist_joy.h"
 
 #include <map>
 #include <string>
