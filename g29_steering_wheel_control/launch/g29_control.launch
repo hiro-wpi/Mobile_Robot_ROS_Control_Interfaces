@@ -2,7 +2,7 @@
 
     <!-- Steering Input -->
     <!-- Set the joystick input -->
-    <arg name="joystick" default="js1"/>
+    <arg name="joystick" default="js0"/>
     <arg name="base_topic" default="cmd_vel"/>
 
     <!-- Joy node -->
