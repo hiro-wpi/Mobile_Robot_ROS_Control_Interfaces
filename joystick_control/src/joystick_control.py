@@ -40,6 +40,9 @@ JOY_RX_DEADBAND = 0.25
 # Joystick Button Defines
 update_data = 0
 
+#Vibration Data Variables
+
+
 print("Welcome!")
 
 class JoystickControl():
@@ -58,6 +61,9 @@ class JoystickControl():
         print("Mr. Bhushan Rane")
 
         self.flag = 1
+        self.feedback_flag = 0
+        self.vibration_strong_value = 1000
+        self.vibration_weak_value = 1000
 
     def get_joystick_callback(self,data):
         # Initialize published message
@@ -67,39 +73,37 @@ class JoystickControl():
         play.data = 1
          
         vibration = Rumble()
-        vibration.strong_magnitude = 18000
-        vibration.weak_magnitude = 18000
-
+        vibration.strong_magnitude = self.vibration_strong_value
+        vibration.weak_magnitude = self.vibration_weak_value
+       
         sticks = data.axes
         buttons = data.buttons
 
+        # One Time Flag to save current controller button state once.
         if self.flag == 1:
             global update_data
             update_data = buttons
-            self.flag = 0
-        # print(sticks)
-        # print(buttons)   
+            # for i in range(1000):
+            #     vibration.strong_magnitude = 1000
+            #     vibration.weak_magnitude = 1000
+            #     self.publisher1.publish(vibration)
+            # self.feedback_flag = 2  
+            self.flag = 0  
 
         # Map to command
         if sticks[JOY_LY] != 0:
             twist.linear.x = STICK_SCALE * sticks[JOY_LY]
             if (twist.linear.x >= -JOY_LY_DEADBAND and twist.linear.x <= JOY_LY_DEADBAND):
                 twist.linear.x = 0
-            #print(twist.linear.x)
 
         if sticks[JOY_LX] != 0:
             twist.angular.z = -(STICK_SCALE * sticks[JOY_LX])
             if (twist.angular.z >= -JOY_LX_DEADBAND and twist.angular.z <= JOY_LX_DEADBAND):
                 twist.angular.z = 0
-            #print(twist.angular.z)
 
         camera_movement = STICK_SCALE * sticks[JOY_RX]
         if (camera_movement >= -JOY_RX_DEADBAND and camera_movement <= JOY_RX_DEADBAND):
             camera_movement = 0
-
-        # print(twist.linear.x)
-        # print(twist.angular.z)
-        # print(camera_movement)
 
         joy_button_A = (1<<0 & buttons[JOY_A])
         prev_joy_button_A = (1<<0 & update_data[JOY_A])
@@ -118,36 +122,41 @@ class JoystickControl():
         joy_button_Y_pressed = joy_button_Y & ~prev_joy_button_Y
 
         if joy_button_A_pressed:
-            vibration.strong_magnitude = 18000
-            vibration.weak_magnitude = 18000
-            self.publisher1.publish(vibration)  
-            self.publisher3.publish(play)
+            self.vibration_strong_value = 2000
+            self.vibration_weak_value = 2000
+            self.publisher1.publish(vibration)
+            # self.feedback_flag = 1
             print("Button Pressed : A")
+        
         elif joy_button_B_pressed:
-            vibration.strong_magnitude = 10000
-            vibration.weak_magnitude = 10000
-            self.publisher1.publish(vibration)  
-            self.publisher3.publish(play)
+            self.vibration_strong_value = 18000
+            self.vibration_weak_value = 18000
+            self.publisher1.publish(vibration)
+            # self.feedback_flag = 1
             print("Button Pressed : B")
+        
         elif joy_button_X_pressed:
-            vibration.strong_magnitude = 1000
-            vibration.weak_magnitude = 1000
-            self.publisher1.publish(vibration)  
+            # self.feedback_flag = 2
             self.publisher3.publish(play)
             print("Button Pressed : X")
+        
         elif joy_button_Y_pressed:
-            vibration.strong_magnitude = 1500
-            vibration.weak_magnitude = 1500
-            self.publisher1.publish(vibration)  
-            self.publisher3.publish(play)
             print("Button Pressed : Y")     
 
+        # if(self.feedback_flag == 1):
+        #     now = rospy.get_rostime()
+        #     if(now.secs % 2):
+        #         self.publisher1.publish(vibration)
+        #         self.publisher3.publish(play)
+        #     if(now.secs % 5 == 4):
+        #         self.feedback_flag = 2
+        
+        # print("Feedback Flag:",self.feedback_flag)
         update_data = buttons
 
         # rospy.loginfo("Send twist commad: Lx: ", twist.linear.x, ", Az: ", twist.angular.z)
-        self.publisher.publish(twist)
+        self.publisher.publish(twist)    
         
-
 
 if __name__ == "__main__":
     # Launch ros node class
