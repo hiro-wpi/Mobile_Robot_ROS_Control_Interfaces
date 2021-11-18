@@ -5,6 +5,7 @@ from std_msgs.msg import String, Float32, Int32, Header, UInt16
 from geometry_msgs.msg import Point, Twist
 from sensor_msgs.msg import Joy, JoyFeedback
 from joy_feedback_ros.msg import Rumble, Periodic
+import time
 
 #User defined Macros for Analog Sticks on Xbox Controller
 JOY_LX = 0
@@ -37,12 +38,6 @@ JOY_LX_DEADBAND = 0.5
 JOY_LY_DEADBAND = 0.25
 JOY_RX_DEADBAND = 0.25
 
-# Joystick Button Defines
-update_data = 0
-
-#Vibration Data Variables
-
-
 print("Welcome!")
 
 class JoystickControl():
@@ -61,20 +56,26 @@ class JoystickControl():
         print("Mr. Bhushan Rane")
 
         self.flag = 1
+        self.rumble_flag = 0
         self.feedback_flag = 0
-        self.vibration_strong_value = 1000
-        self.vibration_weak_value = 1000
+        self.vibration_strong_value = 2000
+        self.vibration_weak_value = 2000
+        self.prev_vibration_data = 0
+
+    def map(x, in_min, in_max, out_min, out_max):
+        return (((x - in_min) * (out_max - out_min)) / (in_max - in_min)) + out_min
+
 
     def get_joystick_callback(self,data):
         # Initialize published message
         twist = Twist()
 
         play = UInt16()
-        play.data = 1
+        play.data = 0
          
         vibration = Rumble()
-        vibration.strong_magnitude = self.vibration_strong_value
-        vibration.weak_magnitude = self.vibration_weak_value
+        #vibration.strong_magnitude = self.vibration_strong_value
+        #vibration.weak_magnitude = self.vibration_weak_value
        
         sticks = data.axes
         buttons = data.buttons
@@ -91,10 +92,29 @@ class JoystickControl():
             self.flag = 0  
 
         # Map to command
+
+        # ((x - in_min) * (out_max - out_min)) / ((in_max - in_min) + out_min)
         if sticks[JOY_LY] != 0:
             twist.linear.x = STICK_SCALE * sticks[JOY_LY]
             if (twist.linear.x >= -JOY_LY_DEADBAND and twist.linear.x <= JOY_LY_DEADBAND):
                 twist.linear.x = 0
+
+        vibration_data = (((sticks[JOY_LX] - (-1.0)) * (18000 - 2000)) / (1.0-(-1.0))) + 2000
+        vibration_data = (int)(vibration_data / 1000)
+        vibration_data = vibration_data*1000
+        if (vibration_data != self.prev_vibration_data):
+            vibration.strong_magnitude = vibration_data
+            vibration.weak_magnitude = vibration_data
+            self.rumble_flag = 0
+            if (self.rumble_flag ==0):
+                self.publisher1.publish(vibration)
+                self.rumble_flag = 1
+            if(self.rumble_flag == 1):
+                self.publisher3.publish(play)
+                self.rumble_flag = 2
+            self.prev_vibration_data = vibration_data
+
+        print("Magnitude :", vibration_data)
 
         if sticks[JOY_LX] != 0:
             twist.angular.z = -(STICK_SCALE * sticks[JOY_LX])
@@ -122,25 +142,43 @@ class JoystickControl():
         joy_button_Y_pressed = joy_button_Y & ~prev_joy_button_Y
 
         if joy_button_A_pressed:
-            self.vibration_strong_value = 2000
-            self.vibration_weak_value = 2000
+            vibration.strong_magnitude = 2000
+            vibration.weak_magnitude = 2000
+            play.data = 0
             self.publisher1.publish(vibration)
-            # self.feedback_flag = 1
+            self.publisher3.publish(play)
             print("Button Pressed : A")
         
         elif joy_button_B_pressed:
-            self.vibration_strong_value = 18000
-            self.vibration_weak_value = 18000
+            vibration.strong_magnitude = 18000
+            vibration.weak_magnitude = 18000
+            play.data = 0
             self.publisher1.publish(vibration)
-            # self.feedback_flag = 1
+            self.publisher3.publish(play)     
             print("Button Pressed : B")
         
         elif joy_button_X_pressed:
+            vibration.strong_magnitude = 2000
+            vibration.weak_magnitude = 2000
+            play.data = 1
+            self.publisher1.publish(vibration)
             self.publisher3.publish(play)
             print("Button Pressed : X")
         
         elif joy_button_Y_pressed:
+            vibration.strong_magnitude = 18000
+            vibration.weak_magnitude = 18000
+            play.data = 1
+            self.publisher1.publish(vibration)
+            self.publisher3.publish(play)
             print("Button Pressed : Y")     
+
+        #self.publisher1.publish(vibration)
+
+        # now = rospy.get_rostime()
+        # if(now.secs % 2):
+        #     self.publisher1.publish(vibration)
+        #     self.publisher3.publish(play)
 
         # if(self.feedback_flag == 1):
         #     now = rospy.get_rostime()
