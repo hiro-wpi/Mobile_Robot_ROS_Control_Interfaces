@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 
 import rospy
-from std_msgs.msg import String, Float32, Int32, Header, UInt16
+from std_msgs.msg import String, Float32, Int32, Header, UInt16, Float64
 from geometry_msgs.msg import Point, Twist
-from sensor_msgs.msg import Joy, JoyFeedback
+from sensor_msgs.msg import Joy, JoyFeedback, LaserScan
 from joy_feedback_ros.msg import Rumble, Periodic
 
 #User defined Macros for Analog Sticks on Xbox Controller
@@ -36,11 +36,9 @@ STICK_SCALE = 1.0
 JOY_LX_DEADBAND = 0.5
 JOY_LY_DEADBAND = 0.25
 JOY_RX_DEADBAND = 0.25
-
+JOY_RY_DEADBAND = 0.25
 # Joystick Button Defines
 update_data = 0
-
-print("Welcome!")
 
 class JoystickControl():
 
@@ -48,16 +46,27 @@ class JoystickControl():
         # ROS
         # subscribe to joystick input
         self.subscriber = rospy.Subscriber("joy", Joy, self.get_joystick_callback)
-        
+        self.subscriber2 = rospy.Subscriber("base_scan", LaserScan, self.get_feedback)
         # publish the control command
         self.publisher = rospy.Publisher("cmd_vel", Twist, queue_size=1)
         self.publisher1 = rospy.Publisher("rumble", Rumble, queue_size=1)
         self.publisher2 = rospy.Publisher("periodic", Periodic, queue_size=1)
         self.publisher3 = rospy.Publisher("play", UInt16, queue_size=1)
         
-        print("Mr. Bhushan Rane")
-
+        # /main_cam_pitch_controller/command
+        # /main_cam_yaw_controller/command
+        self.camera_yaw = rospy.Publisher("main_cam_yaw_controller/command", Float64, queue_size=1)
+        self.camera_pitch = rospy.Publisher("main_cam_pitch_controller/command", Float64, queue_size=1)
         self.flag = 1
+        self.laser_toggle = 0
+    # def get_feedback(self, data):
+    # laser_range = data.ranges
+    #     if(laser_range[0]):
+    #         self.laser_toggle = 1
+    #     # for i in range(0,len(laser_range)):
+        #     if(laser_range[i] > 0.1 and laser_range[i] < 1):
+        #         self.laser_toggle = 1
+        # self.laser_toggle = 1
 
     def get_joystick_callback(self,data):
         # Initialize published message
@@ -65,10 +74,22 @@ class JoystickControl():
 
         play = UInt16()
         play.data = 1
-         
+        
+        camera_yaw_movement = Float64()
+        camera_pitch_movement = Float64()
+        
         vibration = Rumble()
-        vibration.strong_magnitude = 18000
-        vibration.weak_magnitude = 18000
+            
+        if(self.laser_toggle == 1):
+            vibration.strong_magnitude = 18000
+            vibration.weak_magnitude = 18000
+            self.publisher1.publish(vibration)  
+            self.publisher3.publish(play)
+        else:
+            vibration.strong_magnitude = 0
+            vibration.weak_magnitude = 0
+            self.publisher1.publish(vibration)  
+            self.publisher3.publish(play)
 
         sticks = data.axes
         buttons = data.buttons
@@ -93,13 +114,17 @@ class JoystickControl():
                 twist.angular.z = 0
             #print(twist.angular.z)
 
-        camera_movement = STICK_SCALE * sticks[JOY_RX]
-        if (camera_movement >= -JOY_RX_DEADBAND and camera_movement <= JOY_RX_DEADBAND):
-            camera_movement = 0
+        camera_yaw_movement = STICK_SCALE * sticks[JOY_RX]
+        if (camera_yaw_movement >= -JOY_RX_DEADBAND and camera_yaw_movement <= JOY_RX_DEADBAND):
+            camera_yaw_movement = 0
+
+        camera_pitch_movement = STICK_SCALE * sticks[JOY_RY]
+        if (camera_pitch_movement >= -JOY_RY_DEADBAND and camera_pitch_movement <= JOY_RY_DEADBAND):
+            camera_pitch_movement = 0
 
         # print(twist.linear.x)
-        # print(twist.angular.z)
-        # print(camera_movement)
+        #print(camera_yaw_movement)
+        #print(camera_pitch_movement)
 
         joy_button_A = (1<<0 & buttons[JOY_A])
         prev_joy_button_A = (1<<0 & update_data[JOY_A])
@@ -117,36 +142,37 @@ class JoystickControl():
         prev_joy_button_Y = (1<<0 & update_data[JOY_Y])
         joy_button_Y_pressed = joy_button_Y & ~prev_joy_button_Y
 
-        if joy_button_A_pressed:
-            vibration.strong_magnitude = 18000
-            vibration.weak_magnitude = 18000
-            self.publisher1.publish(vibration)  
-            self.publisher3.publish(play)
-            print("Button Pressed : A")
-        elif joy_button_B_pressed:
-            vibration.strong_magnitude = 10000
-            vibration.weak_magnitude = 10000
-            self.publisher1.publish(vibration)  
-            self.publisher3.publish(play)
-            print("Button Pressed : B")
-        elif joy_button_X_pressed:
-            vibration.strong_magnitude = 1000
-            vibration.weak_magnitude = 1000
-            self.publisher1.publish(vibration)  
-            self.publisher3.publish(play)
-            print("Button Pressed : X")
-        elif joy_button_Y_pressed:
-            vibration.strong_magnitude = 1500
-            vibration.weak_magnitude = 1500
-            self.publisher1.publish(vibration)  
-            self.publisher3.publish(play)
-            print("Button Pressed : Y")     
+        # if joy_button_A_pressed:
+        #     vibration.strong_magnitude = 18000
+        #     vibration.weak_magnitude = 18000
+        #     self.publisher1.publish(vibration)  
+        #     self.publisher3.publish(play)
+        #     print("Button Pressed : A")
+        # elif joy_button_B_pressed:
+        #     vibration.strong_magnitude = 10000
+        #     vibration.weak_magnitude = 10000
+        #     self.publisher1.publish(vibration)  
+        #     self.publisher3.publish(play)
+        #     print("Button Pressed : B")
+        # elif joy_button_X_pressed:
+        #     vibration.strong_magnitude = 1000
+        #     vibration.weak_magnitude = 1000
+        #     self.publisher1.publish(vibration)  
+        #     self.publisher3.publish(play)
+        #     print("Button Pressed : X")
+        # elif joy_button_Y_pressed:
+        #     vibration.strong_magnitude = 1500
+        #     vibration.weak_magnitude = 1500
+        #     self.publisher1.publish(vibration)  
+        #     self.publisher3.publish(play)
+        #     print("Button Pressed : Y")     
 
         update_data = buttons
 
         # rospy.loginfo("Send twist commad: Lx: ", twist.linear.x, ", Az: ", twist.angular.z)
         self.publisher.publish(twist)
-        
+        self.camera_pitch.publish(camera_pitch_movement)
+        self.camera_yaw.publish(camera_yaw_movement)
 
 
 if __name__ == "__main__":
