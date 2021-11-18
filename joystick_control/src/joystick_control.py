@@ -136,7 +136,6 @@ class JoystickControl():
             print("Button Pressed : B")
         
         elif joy_button_X_pressed:
-            # self.feedback_flag = 2
             self.publisher3.publish(play)
             print("Button Pressed : X")
         
