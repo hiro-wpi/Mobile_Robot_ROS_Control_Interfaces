@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import rospy
-from std_msgs.msg import String, Float32, Int32, Header, UInt16
+from std_msgs.msg import String, Float32, Int32, Header, UInt16, UInt8
 from geometry_msgs.msg import Point, Twist
 from sensor_msgs.msg import Joy, JoyFeedback
 from joy_feedback_ros.msg import Rumble, Periodic
@@ -61,6 +61,10 @@ class JoystickControl():
         self.vibration_strong_value = 2000
         self.vibration_weak_value = 2000
         self.prev_vibration_data = 0
+        self.left_arrow_flag = 0
+        self.right_arrow_flag = 0
+        self.up_arrow_flag = 0
+        self.down_arrow_flag = 0
 
     def map(x, in_min, in_max, out_min, out_max):
         return (((x - in_min) * (out_max - out_min)) / (in_max - in_min)) + out_min
@@ -82,13 +86,12 @@ class JoystickControl():
 
         # One Time Flag to save current controller button state once.
         if self.flag == 1:
-            global update_data
+            global update_data, update_left_arrow, update_right_arrow, update_up_arrow, update_down_arrow
             update_data = buttons
-            # for i in range(1000):
-            #     vibration.strong_magnitude = 1000
-            #     vibration.weak_magnitude = 1000
-            #     self.publisher1.publish(vibration)
-            # self.feedback_flag = 2  
+            update_left_arrow = self.left_arrow_flag
+            update_right_arrow = self.right_arrow_flag
+            update_up_arrow = self.up_arrow_flag
+            update_down_arrow = self.down_arrow_flag
             self.flag = 0  
 
         # Map to command
@@ -114,7 +117,7 @@ class JoystickControl():
                 self.rumble_flag = 2
             self.prev_vibration_data = vibration_data
 
-        print("Magnitude :", vibration_data)
+        # print("Magnitude :", vibration_data)
 
         if sticks[JOY_LX] != 0:
             twist.angular.z = -(STICK_SCALE * sticks[JOY_LX])
@@ -140,6 +143,42 @@ class JoystickControl():
         joy_button_Y = (1<<0 & buttons[JOY_Y])
         prev_joy_button_Y = (1<<0 & update_data[JOY_Y])
         joy_button_Y_pressed = joy_button_Y & ~prev_joy_button_Y
+
+        if (sticks[JOY_ARROW_LEFTRIGHT] == 0):
+            self.left_arrow_flag = 0
+            self.right_arrow_flag = 0
+        elif (sticks[JOY_ARROW_LEFTRIGHT] == 1):
+            self.left_arrow_flag = 1
+            self.right_arrow_flag = 0
+        elif (sticks[JOY_ARROW_LEFTRIGHT] == -1):
+            self.left_arrow_flag = 0
+            self.right_arrow_flag = 1
+
+        joy_button_arrow_left = (1<<0 & self.left_arrow_flag)
+        prev_joy_button_arrow_left = (1<<0 & (int)(update_left_arrow))
+        joy_button_arrow_left_pressed = joy_button_arrow_left & ~prev_joy_button_arrow_left
+
+        joy_button_arrow_right = (1<<0 & self.right_arrow_flag)
+        prev_joy_button_arrow_right = (1<<0 & (int)(update_right_arrow))
+        joy_button_arrow_right_pressed = joy_button_arrow_right & ~prev_joy_button_arrow_right
+
+        if (sticks[JOY_ARROW_UPDOWN] == 0):
+            self.up_arrow_flag = 0
+            self.down_arrow_flag = 0
+        elif (sticks[JOY_ARROW_UPDOWN] == 1):
+            self.up_arrow_flag = 1
+            self.down_arrow_flag = 0
+        elif (sticks[JOY_ARROW_UPDOWN] == -1):
+            self.up_arrow_flag = 0
+            self.down_arrow_flag = 1
+
+        joy_button_arrow_up = (1<<0 & self.up_arrow_flag)
+        prev_joy_button_arrow_up = (1<<0 & (int)(update_up_arrow))
+        joy_button_arrow_up_pressed = joy_button_arrow_up & ~prev_joy_button_arrow_up
+
+        joy_button_arrow_down = (1<<0 & self.down_arrow_flag)
+        prev_joy_button_arrow_down = (1<<0 & (int)(update_down_arrow))
+        joy_button_arrow_down_pressed = joy_button_arrow_down & ~prev_joy_button_arrow_down
 
         if joy_button_A_pressed:
             vibration.strong_magnitude = 2000
@@ -171,7 +210,22 @@ class JoystickControl():
             play.data = 1
             self.publisher1.publish(vibration)
             self.publisher3.publish(play)
-            print("Button Pressed : Y")     
+            print("Button Pressed : Y") 
+
+        elif joy_button_arrow_left_pressed:
+            print("Button Pressed : LEFT ARROW")
+
+        elif joy_button_arrow_right_pressed:
+            print("Button Pressed : RIGHT ARROW")
+
+        elif joy_button_arrow_up_pressed:
+            print("Button Pressed : UP ARROW")
+
+        elif joy_button_arrow_down_pressed:
+            print("Button Pressed : DOWN ARROW")
+
+
+
 
         #self.publisher1.publish(vibration)
 
@@ -189,7 +243,15 @@ class JoystickControl():
         #         self.feedback_flag = 2
         
         # print("Feedback Flag:",self.feedback_flag)
+        
+        
+        # BELOW LINES OF CODE ARE USED TO SAVE UPDATED BUTTON STATE
+        # Add code if any more buttons are added but never delete - Bhushan Ashok Rane (barane@wpi.edu) 
         update_data = buttons
+        update_left_arrow = self.left_arrow_flag
+        update_right_arrow = self.right_arrow_flag
+        update_up_arrow = self.up_arrow_flag
+        update_down_arrow = self.down_arrow_flag
 
         # rospy.loginfo("Send twist commad: Lx: ", twist.linear.x, ", Az: ", twist.angular.z)
         self.publisher.publish(twist)    
