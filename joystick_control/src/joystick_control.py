@@ -46,7 +46,7 @@ class JoystickControl():
         # ROS
         # subscribe to joystick input
         self.subscriber = rospy.Subscriber("joy", Joy, self.get_joystick_callback)
-        #self.subscriber2 = rospy.Subscriber("base_scan", LaserScan, self.get_feedback)
+        self.subscriber2 = rospy.Subscriber("base_scan", LaserScan, self.get_feedback)
         # publish the control command
         self.publisher = rospy.Publisher("base_controller/cmd_vel", Twist, queue_size=1)
         self.publisher1 = rospy.Publisher("rumble", Rumble, queue_size=1)
@@ -70,6 +70,10 @@ class JoystickControl():
 
     def get_feedback(self, data):
         self.laser_range = data.ranges
+        temp = self.laser_range[82:110]
+        # Center laser data start index : 82 and end index :110
+        for i in range (82,110):
+            self.feedback_flag = 0        
     #     if(laser_range[0]):
     #         self.laser_toggle = 1
     #     # for i in range(0,len(laser_range)):
