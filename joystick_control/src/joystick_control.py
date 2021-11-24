@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 
 import rospy
-from std_msgs.msg import String, Float32, Int32, Header, UInt16, UInt8
+from std_msgs.msg import String, Float32, Int32, Header, UInt16, UInt8, Float64
 from geometry_msgs.msg import Point, Twist
-from sensor_msgs.msg import Joy, JoyFeedback
+from sensor_msgs.msg import Joy, JoyFeedback, LaserScan
 from joy_feedback_ros.msg import Rumble, Periodic
 import time
 
@@ -37,7 +37,7 @@ STICK_SCALE = 1.0
 JOY_LX_DEADBAND = 0.5
 JOY_LY_DEADBAND = 0.25
 JOY_RX_DEADBAND = 0.25
-
+JOY_RY_DEADBAND = 0.25
 print("Welcome!")
 
 class JoystickControl():
@@ -46,13 +46,15 @@ class JoystickControl():
         # ROS
         # subscribe to joystick input
         self.subscriber = rospy.Subscriber("joy", Joy, self.get_joystick_callback)
-        
+        #self.subscriber2 = rospy.Subscriber("base_scan", LaserScan, self.get_feedback)
         # publish the control command
-        self.publisher = rospy.Publisher("cmd_vel", Twist, queue_size=1)
+        self.publisher = rospy.Publisher("base_controller/cmd_vel", Twist, queue_size=1)
         self.publisher1 = rospy.Publisher("rumble", Rumble, queue_size=1)
         self.publisher2 = rospy.Publisher("periodic", Periodic, queue_size=1)
         self.publisher3 = rospy.Publisher("play", UInt16, queue_size=1)
         
+        self.camera_yaw = rospy.Publisher("main_cam_yaw_controller/command", Float64, queue_size=1)
+        self.camera_pitch = rospy.Publisher("main_cam_pitch_controller/command", Float64, queue_size=1)
         print("Mr. Bhushan Rane")
 
         self.flag = 1
@@ -64,7 +66,16 @@ class JoystickControl():
         self.right_arrow_flag = 0
         self.up_arrow_flag = 0
         self.down_arrow_flag = 0
+        self.laser_range = []
 
+    def get_feedback(self, data):
+        self.laser_range = data.ranges
+    #     if(laser_range[0]):
+    #         self.laser_toggle = 1
+    #     # for i in range(0,len(laser_range)):
+        #     if(laser_range[i] > 0.1 and laser_range[i] < 1):
+        #         self.laser_toggle = 1
+        # self.laser_toggle = 1
     def map(x, in_min, in_max, out_min, out_max):
         return (((x - in_min) * (out_max - out_min)) / (in_max - in_min)) + out_min
 
@@ -72,7 +83,8 @@ class JoystickControl():
     def get_joystick_callback(self,data):
         # Initialize published message
         twist = Twist()
-
+        camera_yaw_movement = Float64()
+        camera_pitch_movement = Float64()
         play = UInt16()
         play.data = 0
          
@@ -117,6 +129,14 @@ class JoystickControl():
         camera_movement = STICK_SCALE * sticks[JOY_RX]
         if (camera_movement >= -JOY_RX_DEADBAND and camera_movement <= JOY_RX_DEADBAND):
             camera_movement = 0
+        
+        camera_yaw_movement = STICK_SCALE * sticks[JOY_RX]
+        if (camera_yaw_movement >= -JOY_RX_DEADBAND and camera_yaw_movement <= JOY_RX_DEADBAND):
+            camera_yaw_movement = 0
+
+        camera_pitch_movement = STICK_SCALE * sticks[JOY_RY]
+        if (camera_pitch_movement >= -JOY_RY_DEADBAND and camera_pitch_movement <= JOY_RY_DEADBAND):
+            camera_pitch_movement = 0
 
         joy_button_A = (1<<0 & buttons[JOY_A])
         prev_joy_button_A = (1<<0 & update_data[JOY_A])
@@ -253,7 +273,11 @@ class JoystickControl():
         update_down_arrow = self.down_arrow_flag
 
         # rospy.loginfo("Send twist command: Lx: ", twist.linear.x, ", Az: ", twist.angular.z)
-        self.publisher.publish(twist)    
+        self.publisher.publish(twist)  
+
+        #Publish Camera pitcph and yaw
+        #self.camera_pitch.publish(camera_pitch_movement)
+        #self.camera_yaw.publish(camera_yaw_movement)  
         
 
 if __name__ == "__main__":
