@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 device_name: "/dev/input/event6"
+=======
+device_name: "/dev/input/event4"
+>>>>>>> 02235e69bc9100f478307dff43390f0b5fd35e40
 Kp: 1.0
 Ki: 0.0
 Kd: 0.2

@@ -18,7 +18,7 @@
     <node name="g29_control_node" pkg="g29_steering_wheel_control" type="g29_control.py">
         <remap from="cmd_vel" to="$(arg base_topic)" />
     </node>
-
+    
     
     <!-- Force feedback -->
     <!-- Load logitech g29 configuration -->
