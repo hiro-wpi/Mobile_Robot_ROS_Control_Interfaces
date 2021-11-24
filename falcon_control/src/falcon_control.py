@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import rospy
-from geometry_msgs.msg import Point, Twist
+from geometry_msgs.msg import Point, Twist, Vector3
 
 
 class FalconControl():
@@ -11,8 +11,9 @@ class FalconControl():
         # subscribe to falcon
         self.falcon_sub = rospy.Subscriber("falcon_pos", Point, self.falcon_callback, queue_size=1)
         # publish the command
-        self.command_pub = rospy.Publisher("cmd_vel", Twist, queue_size=1)
-
+        self.command_pub = rospy.Publisher("base_controller/cmd_vel", Twist, queue_size=1)
+        
+        self.feedback_pub = rospy.Publisher("set_falcon_force", Vector3, queue_size=1)
 
     def falcon_callback(self, data):
         # If falcon is at home position
@@ -32,6 +33,12 @@ class FalconControl():
         cmd_vel.linear.x = vx
         cmd_vel.angular.z = wz
         self.command_pub.publish(cmd_vel)
+        
+        feedback_mode = Vector3()
+        feedback_mode.x = 1.5
+        feedback_mode.y = 1.5
+        feedback_mode.z = 1.5
+        self.feedback_pub.publish(feedback_mode)
 
     def check_home_pos(self, x=0, y=0, z=0.125):
         # Check if falcon is around home position
