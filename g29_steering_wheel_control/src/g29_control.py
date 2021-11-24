@@ -17,7 +17,7 @@ class G29Control():
 
         # ROS
         # publish to the mobile_base controller
-        self.g29_pub = rospy.Publisher('cmd_vel', Twist, queue_size=1)
+        self.g29_pub = rospy.Publisher('/base_controller/cmd_vel', Twist, queue_size=1)
         # subscribe to joystick inputs on topic "joy"
         self.joy_subscriber = rospy.Subscriber("G29/joy", Joy, self.g29_callback)
         
