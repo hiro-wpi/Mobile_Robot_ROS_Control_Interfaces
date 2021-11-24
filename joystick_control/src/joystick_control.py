@@ -1,11 +1,12 @@
 #!/usr/bin/env python
 
+from re import S
 import rospy
 from std_msgs.msg import String, Float32, Int32, Header, UInt16, UInt8, Float64
 from geometry_msgs.msg import Point, Twist
 from sensor_msgs.msg import Joy, JoyFeedback, LaserScan
 from joy_feedback_ros.msg import Rumble, Periodic
-import time
+from time import time, sleep, strftime, time_ns
 
 #User defined Macros for Analog Sticks on Xbox Controller
 JOY_LX = 0
@@ -39,6 +40,8 @@ JOY_LY_DEADBAND = 0.25
 JOY_RX_DEADBAND = 0.25
 JOY_RY_DEADBAND = 0.25
 
+COLLISION_CLEARANCE = 1
+
 print("Welcome!")
 
 class JoystickControl():
@@ -68,19 +71,19 @@ class JoystickControl():
         self.up_arrow_flag = 0
         self.down_arrow_flag = 0
         self.laser_range = []
-
+        self.prev_now = 0
     def get_feedback(self, data):
         self.laser_range = data.ranges
-        temp = self.laser_range[82:110]
+        temp = self.laser_range[90:100]
+        print(temp)
         # Center laser data start index : 82 and end index :110
-        for i in range (82,110):
-            self.feedback_flag = 0        
-    #     if(laser_range[0]):
-    #         self.laser_toggle = 1
-    #     # for i in range(0,len(laser_range)):
-        #     if(laser_range[i] > 0.1 and laser_range[i] < 1):
-        #         self.laser_toggle = 1
-        # self.laser_toggle = 1
+        for i in temp:
+            if i <= COLLISION_CLEARANCE:
+                self.feedback_flag = 1
+            else:
+                self.feedback_flag = 0   
+
+
     def map(x, in_min, in_max, out_min, out_max):
         return (((x - in_min) * (out_max - out_min)) / (in_max - in_min)) + out_min
 
@@ -106,7 +109,7 @@ class JoystickControl():
             update_right_arrow = self.right_arrow_flag
             update_up_arrow = self.up_arrow_flag
             update_down_arrow = self.down_arrow_flag
-            time.sleep(1)
+            sleep(1)
             vibration.strong_magnitude = 16000
             vibration.weak_magnitude = 16000
             play.data = 0
@@ -223,12 +226,22 @@ class JoystickControl():
         elif joy_button_arrow_down_pressed:
             self.vibration_data = self.vibration_data - 1000
             print("Button Pressed : DOWN ARROW")
+        
+        print("Feedback_flag : ", self.feedback_flag)
+        if self.feedback_flag:
+            self.rumble_flag = 1
 
+        print("TIME :: ", strftime("%S"))
         if (self.rumble_flag == 1):
             play.data = 1
-            self.publisher3.publish(play)
-            self.rumble_flag = 0
-
+            
+            now = strftime("%S")
+            
+                
+            if now != self.prev_now:
+                self.publisher3.publish(play)
+                self.rumble_flag = 0
+                self.prev_now = now
         # if (self.vibration_data != self.prev_vibration_data):
         #     if(self.vibration_data < 0):
         #         self.vibration_data = 0
