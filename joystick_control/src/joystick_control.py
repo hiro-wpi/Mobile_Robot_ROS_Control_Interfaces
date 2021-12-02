@@ -72,6 +72,7 @@ class JoystickControl():
         self.down_arrow_flag = 0
         self.laser_range = []
         self.prev_now = 0
+        
     def get_feedback(self, data):
         self.laser_range = data.ranges
         temp = self.laser_range[90:100]
