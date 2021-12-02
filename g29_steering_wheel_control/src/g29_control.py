@@ -27,7 +27,7 @@ class G29Control():
         linear_vel_fwd = data.axes[2]
         linear_vel_bwd = data.axes[3]
 
-        # Publsish
+        # Publish
         twist = Twist()
         twist.linear.x = (linear_vel_fwd - linear_vel_bwd) / 2.0 # [-1, 1]
         twist.angular.z = self.steering_ratio * steering_input
