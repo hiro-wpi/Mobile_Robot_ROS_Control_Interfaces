@@ -8,10 +8,10 @@
           type="ros_falcon_interface" output="screen"> 
     </node>
 
-    <!-- Controller - map falcon input into robot input
+    <!-- Controller - map falcon input into robot input -->
     <node name="falcon_control_node" pkg="falcon_control" type="falcon_control.py" output="screen">
         <remap from="cmd_vel" to="$(arg base_topic)" />
-    </node> -->
+    </node>
     
     <!-- Controller to double 3 subscriber-->
     <!-- <node name="double3_falcon_control" pkg="falcon_control" type="double3_falcon.py" output="screen">
