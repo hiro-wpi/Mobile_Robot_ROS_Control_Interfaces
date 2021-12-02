@@ -54,7 +54,7 @@ class FalconControl():
         else:
             fx, fy, fz = self.map_to_world(falcon_x, falcon_y, falcon_z, 2.0, 2.0, 2.0)
             vx = -fz
-            wz = -fx*2
+            wz = -fx*2.5
             if vx < 0:
                 wz = -wz # flip direction when going backwards
             
