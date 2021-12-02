@@ -42,7 +42,7 @@ JOY_RY_DEADBAND = 0.25
 
 COLLISION_CLEARANCE = 1
 
-print("Welcome!")
+#print("Welcome!")
 
 class JoystickControl():
 
@@ -59,7 +59,7 @@ class JoystickControl():
         
         self.camera_yaw = rospy.Publisher("main_cam_yaw_controller/command", Float64, queue_size=1)
         self.camera_pitch = rospy.Publisher("main_cam_pitch_controller/command", Float64, queue_size=1)
-        print("Mr. Bhushan Rane")
+        print("Initialised Joystick")
 
         self.flag = 1
         self.rumble_flag = 0
