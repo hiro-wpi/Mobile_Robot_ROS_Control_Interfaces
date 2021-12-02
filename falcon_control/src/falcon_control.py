@@ -25,21 +25,22 @@ class FalconControl():
         self.centering_pub = rospy.Publisher("set_falcon_haptic_mode", Int8, queue_size=1)
         self.feedback_pub = rospy.Publisher("set_falcon_force", Vector3, queue_size=1)
         self.feedback_flag = 0
+        self.onetimeflag = 1
         self.laser_range = []
 
     def get_feedback(self, data):
         self.laser_range = data.ranges
-        temp = self.laser_range[160:180]
+        temp = self.laser_range[160:200]
         # print(temp)
         # Center laser data start index : 82 and end index :110
         for i in temp:
-            if i > 0.2 and i <= COLLISION_CLEARANCE-0.5:
+            if i > 0.05 and i <= COLLISION_CLEARANCE:
                 self.feedback_flag = 1
-            elif i>COLLISION_CLEARANCE-0.5 and i <= COLLISION_CLEARANCE:
+            elif i>COLLISION_CLEARANCE and i <= COLLISION_CLEARANCE+0.5:
                 self.feedback_flag = 2
-            elif i <= COLLISION_CLEARANCE+0.5 and i> COLLISION_CLEARANCE:
+            elif i <= COLLISION_CLEARANCE+1 and i> COLLISION_CLEARANCE+0.5:
                 self.feedback_flag = 3
-            elif i <= COLLISION_CLEARANCE+1 and i > COLLISION_CLEARANCE+0.5:
+            elif i <= COLLISION_CLEARANCE+1.5 and i > COLLISION_CLEARANCE+1:
                 self.feedback_flag = 4
             else:
                 self.feedback_flag = 0   
@@ -60,6 +61,9 @@ class FalconControl():
         # Publsish
         centering_mode = Int8()
         centering_mode.data = 0
+        if self.onetimeflag == 1:
+            self.centering_pub.publish(centering_mode)
+            self.onetimeflag = 0
         cmd_vel = Twist()
         cmd_vel.linear.x = vx
         cmd_vel.angular.z = wz
@@ -104,44 +108,6 @@ class FalconControl():
             self.centering_pub.publish(centering_mode)
             self.feedback_pub.publish(feedback_mode)
         
-        #falcon_x, falcon_y, falcon_z = self.check_home_pos(data.x, data.y, data.z) 
-        # feedback_mode.x = 0.0
-        # feedback_mode.y = 0.0
-        # feedback_mode.z = 0.0
-        # self.feedback_pub.publish(feedback_mode)
-        # print("x : {}, y : {}, z : {}".format(feedback_mode.x, feedback_mode.y, feedback_mode.z))
-        # time.sleep(3)
-
-        # feedback_mode.x = 0.0
-        # feedback_mode.y = -1.0
-        # feedback_mode.z = 0.0
-        # self.feedback_pub.publish(feedback_mode)
-        # print("x : {}, y : {}, z : {}".format(feedback_mode.x, feedback_mode.y, feedback_mode.z))
-        # time.sleep(3)
-
-        # feedback_mode.x = 0.0
-        # feedback_mode.y = -2.0
-        # feedback_mode.z = 0.0
-        # self.feedback_pub.publish(feedback_mode)
-        # print("x : {}, y : {}, z : {}".format(feedback_mode.x, feedback_mode.y, feedback_mode.z))
-        # time.sleep(3)
-
-        # feedback_mode.x = 0.0
-        # feedback_mode.y = -4.0
-        # feedback_mode.z = 0.0
-        # self.feedback_pub.publish(feedback_mode)
-        # print("x : {}, y : {}, z : {}".format(feedback_mode.x, feedback_mode.y, feedback_mode.z))
-        # time.sleep(3)
-
-        # feedback_mode.x = 0.0
-        # feedback_mode.y = -8.0
-        # feedback_mode.z = 0.0
-        # self.feedback_pub.publish(feedback_mode)
-        # print("x : {}, y : {}, z : {}".format(feedback_mode.x, feedback_mode.y, feedback_mode.z))
-        # time.sleep(3)
-
-
-
     def check_home_pos(self, x=0, y=0, z=0.125):
         # Check if falcon is around home position
         # if so, set to home position
