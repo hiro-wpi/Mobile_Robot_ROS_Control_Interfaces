@@ -6,7 +6,7 @@ from geometry_msgs.msg import Twist
     
 class KeyboardControl():
     def __init__(self):
-        self.pub = rospy.Publisher('base_controller/cmd_vel', Twist, queue_size=1)
+        self.twist_pub = rospy.Publisher('base_controller/cmd_vel', Twist, queue_size=1)
 
         rospy.init_node('keyboard_double3_publisher', anonymous=True)
         rate = rospy.Rate(1) # 1hz
@@ -32,19 +32,19 @@ class KeyboardControl():
         if key == 'w':
             msg.linear.x = 1.0
             msg.angular.z = 0.0 
-            self.pub.publish(msg)
+            self.twist_pub.publish(msg)
         if key == 's':
             msg.linear.x = -1.0
             msg.angular.z = 0.0
-            self.pub.publish(msg)
+            self.twist_pub.publish(msg)
         if key == 'd':
             msg.linear.x = 0.0
             msg.angular.z = 0.5
-            self.pub.publish(msg)
+            self.twist_pub.publish(msg)
         if key == 'a':
             msg.linear.x = 0.0
             msg.angular.z = -0.5
-            self.pub.publish(msg) 
+            self.twist_pub.publish(msg) 
 
     def on_press(self, key):
         global current_key
