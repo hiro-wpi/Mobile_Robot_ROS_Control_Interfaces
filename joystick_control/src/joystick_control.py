@@ -79,7 +79,7 @@ class JoystickControl():
         print(temp)
         # Center laser data start index : 180
         for i in temp:
-            if i > 0.05 and i <= COLLISION_CLEARANCE:
+            if i > 0.05 and i <= COLLISION_CLEARANCE+0.5:
                 self.feedback_flag = 1
             else:
                 self.feedback_flag = 0   
