@@ -1,9 +1,9 @@
 <launch>
 
-   <node pkg="keyboard_and_mouse_control" type="keyboard.py" name = "keyboard_double3_publisher" output= "screen">
+   <node pkg="keyboard_and_mouse_control" type="keyboard_control.py" name = "keyboard_double3_publisher" output= "screen">
    </node>
 
-   <node pkg="keyboard_and_mouse_control" type="client.py" name = "double3_sub" output= "screen">
-   </node>
+   <!-- <node pkg="keyboard_and_mouse_control" type="client.py" name = "double3_sub" output= "screen"> -->
+   <!-- </node> -->
    
 </launch>
