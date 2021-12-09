@@ -6,7 +6,7 @@ from geometry_msgs.msg import Twist
     
 class KeyboardControl():
     def __init__(self):
-        self.pub = rospy.Publisher('keyboard_double3', Twist, queue_size=1)
+        self.pub = rospy.Publisher('base_controller/cmd_vel', Twist, queue_size=1)
 
         rospy.init_node('keyboard_double3_publisher', anonymous=True)
         rate = rospy.Rate(1) # 1hz
