@@ -75,7 +75,7 @@ class JoystickControl():
         
     def get_feedback(self, data):
         self.laser_range = data.ranges
-        temp = self.laser_range[90:100]
+        temp = self.laser_range[160:200]
         print(temp)
         # Center laser data start index : 82 and end index :110
         for i in temp:
