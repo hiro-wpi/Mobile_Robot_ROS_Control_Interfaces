@@ -31,7 +31,7 @@
         <remap from="cmd_vel" to="$(arg base_topic)" />
         <remap from="pitch_yaw" to="$(arg camera_topic)" />
     </node>
-    <param name="device" value="/dev/input/event19" />
+    <param name="device" value="/dev/input/event9" />
     <node name="joy_feedback_ros1" pkg="joy_feedback_ros" type="joy_feedback" output="screen">
     </node>
 
