@@ -1,0 +1,9 @@
+<launch>
+
+   <node pkg="tutorial" type="keyboard.py" name = "keyboard_double3_publisher" output= "screen">
+   </node>
+
+   <node pkg="tutorial" type="client.py" name = "double3_sub" output= "screen">
+   </node>
+   
+</launch>
