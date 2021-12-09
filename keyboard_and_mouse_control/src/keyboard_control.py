@@ -8,7 +8,8 @@ class KeyboardControl():
     def __init__(self):
         self.pub = rospy.Publisher('keyboard_double3', Twist, queue_size=1)
 
-
+        rospy.init_node('keyboard_double3_publisher', anonymous=True)
+        rate = rospy.Rate(1) # 1hz
 
     def key_map(self, key):
         
@@ -19,9 +20,7 @@ class KeyboardControl():
         # 
         global msg
         msg = Twist()
-        
-        rospy.init_node('keyboard_double3_publisher', anonymous=True)
-        rate = rospy.Rate(1) # 1hz
+                
         #print('key pressed : ', current_key)
         #if key == '':
         #    msg.linear.x = 0.0
@@ -46,12 +45,6 @@ class KeyboardControl():
             msg.linear.x = 0.0
             msg.angular.z = -0.5
             self.pub.publish(msg) 
-        
-            
-    
-
-
-        #print('key pressed : ', key)
 
     def on_press(self, key):
         global current_key
@@ -90,7 +83,5 @@ class KeyboardControl():
         listener.start()
 
         while listener.is_alive():
-            
             #print('key pressed : ', current_key)
-
             key_map(current_key)
