@@ -62,8 +62,8 @@ class KeyboardControl():
     def on_release(self, key):
         global current_key
         current_key = ''
-        #if key == keyboard.Key.ctrl:
-        #    return False
+        if key == keyboard.Key.ctrl:
+            return False
         if key == keyboard.Key.esc:
             return False
         else:
