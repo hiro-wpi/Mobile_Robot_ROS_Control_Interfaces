@@ -228,11 +228,11 @@ class JoystickControl():
             self.vibration_data = self.vibration_data - 1000
             print("Button Pressed : DOWN ARROW")
         
-        print("Feedback_flag : ", self.feedback_flag)
+        # print("Feedback_flag : ", self.feedback_flag)
         if self.feedback_flag:
             self.rumble_flag = 1
 
-        print("TIME :: ", strftime("%S"))
+        # print("TIME :: ", strftime("%S"))
         if (self.rumble_flag == 1):
             play.data = 1
             
