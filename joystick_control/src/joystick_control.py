@@ -201,11 +201,11 @@ class JoystickControl():
             print("Button Pressed : A")
         
         elif joy_button_B_pressed:
-            vibration.strong_magnitude = 16000
-            vibration.weak_magnitude = 16000
-            play.data = 0
-            self.publisher1.publish(vibration)
-            self.publisher3.publish(play)     
+            # vibration.strong_magnitude = 16000
+            # vibration.weak_magnitude = 16000
+            # play.data = 0
+            # self.publisher1.publish(vibration)
+            # self.publisher3.publish(play)     
             print("Button Pressed : B")
         
         elif joy_button_X_pressed:
