@@ -59,29 +59,27 @@ class KeyboardControl():
             print('key {0} pressed'.format(key))
             current_key = ''
 
-
     def on_release(self, key):
         global current_key
         current_key = ''
-        #if key == keyboard.Key.esc:
+        #if key == keyboard.Key.ctrl:
         #    return False
-        if key == keyboard.Key.ctrl:
+        if key == keyboard.Key.esc:
             return False
         else:
             current_key = ''
 
-    if __name__ == '__main__':
-        
-        current_key = ''
+if __name__ == '__main__':
+    current_key = ''
+    computer_keyboard = KeyboardControl()
+    print('press ESC to finish the programm')
 
-        print('press CTRL  to finish the programm')
+    # starts keyboard listener
+    listener = keyboard.Listener(
+        on_press=computer_keyboard.on_press,
+        on_release=computer_keyboard.on_release)
+    listener.start()
 
-        # starts keyboard listener
-        listener = keyboard.Listener(
-            on_press=on_press,
-            on_release=on_release)
-        listener.start()
-
-        while listener.is_alive():
-            #print('key pressed : ', current_key)
-            key_map(current_key)
+    while listener.is_alive():
+        #print('key pressed : ', current_key)
+        computer_keyboard.key_map(key = current_key)
